@@ -1,4 +1,5 @@
 import clustering
+import dtree
 import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
@@ -69,7 +70,23 @@ def display_output(inputs: np.ndarray, actual: np.ndarray) -> None:
 
 
 def main():
-    create_and_train_model(clustering.KMeansClustering)
+    # create_and_train_model(clustering.KMeansClustering)
+
+    tree = dtree.DecisionTree()
+
+    input_example = np.array(
+        [
+            [1, 1],
+            [0, 1],
+            [1, 1],
+            [0, 0],
+            [1, 0]
+        ]
+    )
+
+    # 10 inputs with 2 choices, each with 2 options
+    # print(dtree.DecisionTree.entropy(input_example))
+    print(dtree.DecisionTree.information_gain(input_example, 1, 0))
 
 
 if __name__ == '__main__':

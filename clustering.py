@@ -29,7 +29,6 @@ class KMeansClustering:
     def print_results(self) -> None:
         list(map(print, self.centroids))
 
-
     def iterate(self, inputs: np.ndarray):
         """ Iterates the centroids """
         labels = self.label_distribution(inputs)
