@@ -1,15 +1,16 @@
-import clustering
+import knn
 import dtree
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from random import uniform
-from typing import Type, Protocol, ClassVar
 
 # CONSTANTS ===================
-k = 6
+num_groups = 6
+k = 15
 dimensions = 5
 num_points_in_cluster = 50
-cluster_range = 5
+cluster_range = 20
 ranges = (-50, 50)
 
 # SETTINGS ====================
@@ -18,11 +19,11 @@ np.set_printoptions(precision=2)
 
 def create_inputs(print_offsets: bool = True) -> np.ndarray:
     """ Creates a set of n-dimensional inputs grouped into k clusters"""
-    X = np.zeros((num_points_in_cluster * k, dimensions))
+    X = np.zeros((num_points_in_cluster * num_groups, dimensions))
 
     if print_offsets:
         print("Expected: ")
-    for i in range(0, k):
+    for i in range(0, num_groups):
         arr = cluster_range * np.random.rand(num_points_in_cluster, dimensions)
         randoms = np.array([uniform(*ranges) for _ in range(dimensions)])
         arr += randoms
@@ -35,44 +36,39 @@ def create_inputs(print_offsets: bool = True) -> np.ndarray:
     return X
 
 
-class Model(Protocol):
-    centroids: ClassVar[np.ndarray]
-
-    def fit(self, inputs: np.ndarray, *args, **kwargs) -> None:
-        ...
-
-    def print_results(self) -> None:
-        ...
-
-
-def create_and_train_model(model: Type[Model]) -> Model:
+def create_and_train_model(model):
     model = model()
-    X = create_inputs()
-    model.fit(X, k)
+    X = create_inputs(True)
+    model.fit(X, k, num_groups)
 
-    print("Outputs: ")
-    model.print_results()
-
+    test = model.create_random_cluster(model.ranges)
     if dimensions == 2:
-        display_output(X, model.centroids)
+        display_output(X, test, model)
+    else:
+        print("Outputs: ")
+        model.print_results()
 
     return model
 
 
-def display_output(inputs: np.ndarray, actual: np.ndarray) -> None:
-    plt.scatter(inputs[:, 0], inputs[:, 1])
+def display_output(inputs: np.ndarray, test_input: np.ndarray, model: knn.KNN) -> None:
+    actual = model.centroids
+    labels = model.labels
+
+    sns.scatterplot(x=inputs[:, 0], y=inputs[:, 1], hue=labels)
 
     # plotting the centers
     for center in actual:
-        plt.scatter(*center, c='r', s=10)
+        plt.scatter(*center, c='r', s=10,)
+
+    plt.scatter(*test_input, s=50, marker='o')
+    print(model.classify(test_input, k))
 
     plt.show()
 
 
 def main():
     # create_and_train_model(clustering.KMeansClustering)
-
-    tree = dtree.DecisionTree()
 
     input_example = np.array(
         [
@@ -90,4 +86,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    create_and_train_model(knn.KNN)
+    # main()
